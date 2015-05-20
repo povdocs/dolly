@@ -22,6 +22,9 @@
 			color: 'darkblue'
 		}).moveUp(1);
 		prop.position.copy(box.position);
+		prop.on('updated', function (position) {
+			box.position.copy(position);
+		});
 
 		//fixed target
 		var base = VR.box({
@@ -40,16 +43,18 @@
 		var tProp = dolly.prop({
 			name: 'target'
 		});
+		tProp.on('updatestart', function () {
+			//calculate world position of three.js object
+			tPos.copy(target.position);
+			target.object.localToWorld(tPos);
+
+			//update position of prop
+			tProp.position.copy(tPos);
+		});
 		prop.follow(tProp);
 
 		VR.animate(function (delta) {
-			tPos.copy(target.position);
-			target.object.localToWorld(tPos);
-			tProp.position.copy(tPos);
-
 			dolly.update(delta);
-
-			box.position.copy(prop.position);
 		});
 		</script>
 	</body>

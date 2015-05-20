@@ -26,6 +26,7 @@
     "webpack": "^1.9.7"
   },
   "dependencies": {
+    "event-emitter": "^0.3.3",
     "gl-matrix-vec3": "^2.2.1-npm"
   }
 }

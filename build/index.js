@@ -54,7 +54,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	eval("'use strict';\n\n//dependencies\nvar Vector = __webpack_require__(1);\nvar assign = __webpack_require__(4); //todo: use babel\n\nvar propId = 0;\n\nfunction makeVector(arg) {\n\tfunction V() {\n\t\treturn Vector.apply(this, arg);\n\t}\n\n\tif (typeof arg === 'number') {\n\t\treturn new Vector(arg, arg, arg);\n\t}\n\n\tif (Array.isArray(arg)) {\n\t\tV.prototype = Vector.prototype;\n\t\treturn new V();\n\t}\n\n\tif (arg instanceof Vector) {\n\t\treturn Vector.clone(arg);\n\t}\n\n\treturn new Vector();\n}\n\nfunction Prop(opts) {\n\tvar options = opts || {};\n\n\tthis.lastUpdate = -1;\n\tthis.id = propId++;\n\n\tthis.name = options.name || 'prop' + this.id;\n\n\tthis.position = makeVector(options.position);\n\tthis.minBounds = makeVector(options.minBounds === undefined ? -Infinity : options.minBounds);\n\tthis.maxBounds = makeVector(options.maxBounds === undefined ? Infinity : options.maxBounds);\n\n\tthis.goal = new Vector();\n\tthis.velocity = new Vector();\n\tthis.targets = [];\n}\n\nProp.prototype.follow = function (prop, options) {\n\tvar target = assign({\n\t\tprop: prop,\n\t\tinnerRadius: 0,\n\t\touterRadius: 0,\n\t\tminDistance: 0,\n\t\tmaxDistance: Infinity,\n\t\tweight: 1\n\t}, options, {\n\t\toffset: makeVector(options && options.offset),\n\t\toffsetPosition: new Vector()\n\t});\n\n\tthis.targets.push(target);\n};\n\nProp.prototype.update = function (delta, tick) {\n\tvar _this = this;\n\n\tvar totalWeight = 0;\n\tif (this.lastUpdate >= tick) {\n\t\treturn;\n\t}\n\n\tthis.lastUpdate = tick;\n\n\tif (!this.targets.length) {\n\t\treturn;\n\t}\n\n\tthis.goal.zero();\n\tthis.targets.forEach(function (target) {\n\t\ttotalWeight += target.weight;\n\t\ttarget.offsetPosition.copy(target.prop.position).add(target.offset);\n\t\t_this.goal.scaleAndAdd(target.offsetPosition, target.weight);\n\t});\n\tif (totalWeight) {\n\t\tthis.goal.scale(1 / totalWeight);\n\t}\n\n\t//todo: set velocity toward goal and\n\tthis.velocity.copy(this.goal).scaleAndAdd(this.position, -1); //todo: scale by speed\n\tthis.position.scaleAndAdd(this.velocity, delta);\n\n\t//todo: lerp with Points of Interest/Attractors\n\n\t//fit within bounds\n\tthis.position.min(this.maxBounds).max(this.minBounds);\n};\n\nfunction Dolly() {\n\tvar tick = -1;\n\tvar props = [];\n\tvar updating = false;\n\n\tthis.update = function (delta) {\n\t\tif (updating) {\n\t\t\treturn;\n\t\t}\n\t\tupdating = true;\n\n\t\ttick++;\n\t\tprops.forEach(function (prop) {\n\t\t\tprop.update(delta, tick);\n\t\t});\n\n\t\tupdating = false;\n\t};\n\n\tthis.prop = function (options) {\n\t\tvar prop = new Prop(options);\n\t\tprops.push(prop);\n\t\treturn prop;\n\t};\n}\n\nmodule.exports.Dolly = Dolly;\n\n/*****************\n ** WEBPACK FOOTER\n ** ./src/index.js\n ** module id = 0\n ** module chunks = 0\n **/\n//# sourceURL=webpack:///./src/index.js?");
+	eval("'use strict';\n\n//dependencies\nvar Vector = __webpack_require__(1);\nvar assign = __webpack_require__(4); //todo: use babel\nvar eventEmitter = __webpack_require__(6);\n\nvar propId = 0;\n\nfunction makeVector(arg) {\n\tfunction V() {\n\t\treturn Vector.apply(this, arg);\n\t}\n\n\tif (typeof arg === 'number') {\n\t\treturn new Vector(arg, arg, arg);\n\t}\n\n\tif (Array.isArray(arg)) {\n\t\tV.prototype = Vector.prototype;\n\t\treturn new V();\n\t}\n\n\tif (arg instanceof Vector) {\n\t\treturn Vector.clone(arg);\n\t}\n\n\treturn new Vector();\n}\n\nfunction Prop(opts) {\n\tvar options = opts || {};\n\n\tthis.lastUpdate = -1;\n\tthis.id = propId++;\n\n\tthis.name = options.name || 'prop' + this.id;\n\n\tthis.position = makeVector(options.position);\n\tthis.minBounds = makeVector(options.minBounds === undefined ? -Infinity : options.minBounds);\n\tthis.maxBounds = makeVector(options.maxBounds === undefined ? Infinity : options.maxBounds);\n\n\tthis.goal = new Vector();\n\tthis.velocity = new Vector();\n\tthis.targets = [];\n\n\teventEmitter(this);\n}\n\nProp.prototype.follow = function (prop, options) {\n\tvar target = assign({\n\t\tprop: prop,\n\t\tinnerRadius: 0,\n\t\touterRadius: 0,\n\t\tminDistance: 0,\n\t\tmaxDistance: Infinity,\n\t\tweight: 1\n\t}, options, {\n\t\toffset: makeVector(options && options.offset),\n\t\toffsetPosition: new Vector()\n\t});\n\n\tthis.targets.push(target);\n};\n\nProp.prototype.update = function (delta, tick) {\n\tvar _this = this;\n\n\tvar totalWeight = 0;\n\tif (this.lastUpdate >= tick) {\n\t\treturn;\n\t}\n\n\tthis.lastUpdate = tick;\n\n\tthis.emit('updatestart', this.position);\n\n\tif (!this.targets.length) {\n\t\treturn;\n\t}\n\n\tthis.goal.zero();\n\tthis.targets.forEach(function (target) {\n\t\ttotalWeight += target.weight;\n\t\ttarget.offsetPosition.copy(target.prop.position).add(target.offset);\n\t\t_this.goal.scaleAndAdd(target.offsetPosition, target.weight);\n\t});\n\tif (totalWeight) {\n\t\tthis.goal.scale(1 / totalWeight);\n\t}\n\n\t//todo: set velocity toward goal and\n\tthis.velocity.copy(this.goal).scaleAndAdd(this.position, -1); //todo: scale by speed\n\n\tthis.emit('update', this.position, this.velocity);\n\n\tthis.position.scaleAndAdd(this.velocity, delta);\n\n\t//todo: lerp with Points of Interest/Attractors\n\n\t//fit within bounds\n\tthis.position.min(this.maxBounds).max(this.minBounds);\n\n\tthis.emit('updated', this.position);\n};\n\nfunction Dolly() {\n\tvar tick = -1;\n\tvar props = [];\n\tvar updating = false;\n\n\tthis.update = function (delta) {\n\t\tif (updating) {\n\t\t\treturn;\n\t\t}\n\t\tupdating = true;\n\n\t\ttick++;\n\t\tprops.forEach(function (prop) {\n\t\t\tprop.update(delta, tick);\n\t\t});\n\n\t\tupdating = false;\n\t};\n\n\tthis.prop = function (options) {\n\t\tvar prop = new Prop(options);\n\t\tprops.push(prop);\n\t\treturn prop;\n\t};\n}\n\nmodule.exports.Dolly = Dolly;\n\n/*****************\n ** WEBPACK FOOTER\n ** ./src/index.js\n ** module id = 0\n ** module chunks = 0\n **/\n//# sourceURL=webpack:///./src/index.js?");
 
 /***/ },
 /* 1 */
@@ -79,6 +79,96 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	eval("'use strict';\n\nfunction ToObject(val) {\n\tif (val == null) {\n\t\tthrow new TypeError('Object.assign cannot be called with null or undefined');\n\t}\n\n\treturn Object(val);\n}\n\nmodule.exports = Object.assign || function (target, source) {\n\tvar from;\n\tvar keys;\n\tvar to = ToObject(target);\n\n\tfor (var s = 1; s < arguments.length; s++) {\n\t\tfrom = arguments[s];\n\t\tkeys = Object.keys(Object(from));\n\n\t\tfor (var i = 0; i < keys.length; i++) {\n\t\t\tto[keys[i]] = from[keys[i]];\n\t\t}\n\t}\n\n\treturn to;\n};\n\n\n/*****************\n ** WEBPACK FOOTER\n ** ./~/object-assign/index.js\n ** module id = 4\n ** module chunks = 0\n **/\n//# sourceURL=webpack:///./~/object-assign/index.js?");
+
+/***/ },
+/* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
+	eval("'use strict';\n\nmodule.exports = __webpack_require__(12)()\n\t? Object.assign\n\t: __webpack_require__(13);\n\n\n/*****************\n ** WEBPACK FOOTER\n ** ./~/event-emitter/~/es5-ext/object/assign/index.js\n ** module id = 5\n ** module chunks = 0\n **/\n//# sourceURL=webpack:///./~/event-emitter/~/es5-ext/object/assign/index.js?");
+
+/***/ },
+/* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
+	eval("'use strict';\n\nvar d        = __webpack_require__(7)\n  , callable = __webpack_require__(8)\n\n  , apply = Function.prototype.apply, call = Function.prototype.call\n  , create = Object.create, defineProperty = Object.defineProperty\n  , defineProperties = Object.defineProperties\n  , hasOwnProperty = Object.prototype.hasOwnProperty\n  , descriptor = { configurable: true, enumerable: false, writable: true }\n\n  , on, once, off, emit, methods, descriptors, base;\n\non = function (type, listener) {\n\tvar data;\n\n\tcallable(listener);\n\n\tif (!hasOwnProperty.call(this, '__ee__')) {\n\t\tdata = descriptor.value = create(null);\n\t\tdefineProperty(this, '__ee__', descriptor);\n\t\tdescriptor.value = null;\n\t} else {\n\t\tdata = this.__ee__;\n\t}\n\tif (!data[type]) data[type] = listener;\n\telse if (typeof data[type] === 'object') data[type].push(listener);\n\telse data[type] = [data[type], listener];\n\n\treturn this;\n};\n\nonce = function (type, listener) {\n\tvar once, self;\n\n\tcallable(listener);\n\tself = this;\n\ton.call(this, type, once = function () {\n\t\toff.call(self, type, once);\n\t\tapply.call(listener, this, arguments);\n\t});\n\n\tonce.__eeOnceListener__ = listener;\n\treturn this;\n};\n\noff = function (type, listener) {\n\tvar data, listeners, candidate, i;\n\n\tcallable(listener);\n\n\tif (!hasOwnProperty.call(this, '__ee__')) return this;\n\tdata = this.__ee__;\n\tif (!data[type]) return this;\n\tlisteners = data[type];\n\n\tif (typeof listeners === 'object') {\n\t\tfor (i = 0; (candidate = listeners[i]); ++i) {\n\t\t\tif ((candidate === listener) ||\n\t\t\t\t\t(candidate.__eeOnceListener__ === listener)) {\n\t\t\t\tif (listeners.length === 2) data[type] = listeners[i ? 0 : 1];\n\t\t\t\telse listeners.splice(i, 1);\n\t\t\t}\n\t\t}\n\t} else {\n\t\tif ((listeners === listener) ||\n\t\t\t\t(listeners.__eeOnceListener__ === listener)) {\n\t\t\tdelete data[type];\n\t\t}\n\t}\n\n\treturn this;\n};\n\nemit = function (type) {\n\tvar i, l, listener, listeners, args;\n\n\tif (!hasOwnProperty.call(this, '__ee__')) return;\n\tlisteners = this.__ee__[type];\n\tif (!listeners) return;\n\n\tif (typeof listeners === 'object') {\n\t\tl = arguments.length;\n\t\targs = new Array(l - 1);\n\t\tfor (i = 1; i < l; ++i) args[i - 1] = arguments[i];\n\n\t\tlisteners = listeners.slice();\n\t\tfor (i = 0; (listener = listeners[i]); ++i) {\n\t\t\tapply.call(listener, this, args);\n\t\t}\n\t} else {\n\t\tswitch (arguments.length) {\n\t\tcase 1:\n\t\t\tcall.call(listeners, this);\n\t\t\tbreak;\n\t\tcase 2:\n\t\t\tcall.call(listeners, this, arguments[1]);\n\t\t\tbreak;\n\t\tcase 3:\n\t\t\tcall.call(listeners, this, arguments[1], arguments[2]);\n\t\t\tbreak;\n\t\tdefault:\n\t\t\tl = arguments.length;\n\t\t\targs = new Array(l - 1);\n\t\t\tfor (i = 1; i < l; ++i) {\n\t\t\t\targs[i - 1] = arguments[i];\n\t\t\t}\n\t\t\tapply.call(listeners, this, args);\n\t\t}\n\t}\n};\n\nmethods = {\n\ton: on,\n\tonce: once,\n\toff: off,\n\temit: emit\n};\n\ndescriptors = {\n\ton: d(on),\n\tonce: d(once),\n\toff: d(off),\n\temit: d(emit)\n};\n\nbase = defineProperties({}, descriptors);\n\nmodule.exports = exports = function (o) {\n\treturn (o == null) ? create(base) : defineProperties(Object(o), descriptors);\n};\nexports.methods = methods;\n\n\n/*****************\n ** WEBPACK FOOTER\n ** ./~/event-emitter/index.js\n ** module id = 6\n ** module chunks = 0\n **/\n//# sourceURL=webpack:///./~/event-emitter/index.js?");
+
+/***/ },
+/* 7 */
+/***/ function(module, exports, __webpack_require__) {
+
+	eval("'use strict';\n\nvar assign        = __webpack_require__(5)\n  , normalizeOpts = __webpack_require__(9)\n  , isCallable    = __webpack_require__(10)\n  , contains      = __webpack_require__(11)\n\n  , d;\n\nd = module.exports = function (dscr, value/*, options*/) {\n\tvar c, e, w, options, desc;\n\tif ((arguments.length < 2) || (typeof dscr !== 'string')) {\n\t\toptions = value;\n\t\tvalue = dscr;\n\t\tdscr = null;\n\t} else {\n\t\toptions = arguments[2];\n\t}\n\tif (dscr == null) {\n\t\tc = w = true;\n\t\te = false;\n\t} else {\n\t\tc = contains.call(dscr, 'c');\n\t\te = contains.call(dscr, 'e');\n\t\tw = contains.call(dscr, 'w');\n\t}\n\n\tdesc = { value: value, configurable: c, enumerable: e, writable: w };\n\treturn !options ? desc : assign(normalizeOpts(options), desc);\n};\n\nd.gs = function (dscr, get, set/*, options*/) {\n\tvar c, e, options, desc;\n\tif (typeof dscr !== 'string') {\n\t\toptions = set;\n\t\tset = get;\n\t\tget = dscr;\n\t\tdscr = null;\n\t} else {\n\t\toptions = arguments[3];\n\t}\n\tif (get == null) {\n\t\tget = undefined;\n\t} else if (!isCallable(get)) {\n\t\toptions = get;\n\t\tget = set = undefined;\n\t} else if (set == null) {\n\t\tset = undefined;\n\t} else if (!isCallable(set)) {\n\t\toptions = set;\n\t\tset = undefined;\n\t}\n\tif (dscr == null) {\n\t\tc = true;\n\t\te = false;\n\t} else {\n\t\tc = contains.call(dscr, 'c');\n\t\te = contains.call(dscr, 'e');\n\t}\n\n\tdesc = { get: get, set: set, configurable: c, enumerable: e };\n\treturn !options ? desc : assign(normalizeOpts(options), desc);\n};\n\n\n/*****************\n ** WEBPACK FOOTER\n ** ./~/event-emitter/~/d/index.js\n ** module id = 7\n ** module chunks = 0\n **/\n//# sourceURL=webpack:///./~/event-emitter/~/d/index.js?");
+
+/***/ },
+/* 8 */
+/***/ function(module, exports, __webpack_require__) {
+
+	eval("'use strict';\n\nmodule.exports = function (fn) {\n\tif (typeof fn !== 'function') throw new TypeError(fn + \" is not a function\");\n\treturn fn;\n};\n\n\n/*****************\n ** WEBPACK FOOTER\n ** ./~/event-emitter/~/es5-ext/object/valid-callable.js\n ** module id = 8\n ** module chunks = 0\n **/\n//# sourceURL=webpack:///./~/event-emitter/~/es5-ext/object/valid-callable.js?");
+
+/***/ },
+/* 9 */
+/***/ function(module, exports, __webpack_require__) {
+
+	eval("'use strict';\n\nvar forEach = Array.prototype.forEach, create = Object.create;\n\nvar process = function (src, obj) {\n\tvar key;\n\tfor (key in src) obj[key] = src[key];\n};\n\nmodule.exports = function (options/*, …options*/) {\n\tvar result = create(null);\n\tforEach.call(arguments, function (options) {\n\t\tif (options == null) return;\n\t\tprocess(Object(options), result);\n\t});\n\treturn result;\n};\n\n\n/*****************\n ** WEBPACK FOOTER\n ** ./~/event-emitter/~/es5-ext/object/normalize-options.js\n ** module id = 9\n ** module chunks = 0\n **/\n//# sourceURL=webpack:///./~/event-emitter/~/es5-ext/object/normalize-options.js?");
+
+/***/ },
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+	eval("// Deprecated\n\n'use strict';\n\nmodule.exports = function (obj) { return typeof obj === 'function'; };\n\n\n/*****************\n ** WEBPACK FOOTER\n ** ./~/event-emitter/~/es5-ext/object/is-callable.js\n ** module id = 10\n ** module chunks = 0\n **/\n//# sourceURL=webpack:///./~/event-emitter/~/es5-ext/object/is-callable.js?");
+
+/***/ },
+/* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
+	eval("'use strict';\n\nmodule.exports = __webpack_require__(14)()\n\t? String.prototype.contains\n\t: __webpack_require__(15);\n\n\n/*****************\n ** WEBPACK FOOTER\n ** ./~/event-emitter/~/es5-ext/string/#/contains/index.js\n ** module id = 11\n ** module chunks = 0\n **/\n//# sourceURL=webpack:///./~/event-emitter/~/es5-ext/string/#/contains/index.js?");
+
+/***/ },
+/* 12 */
+/***/ function(module, exports, __webpack_require__) {
+
+	eval("'use strict';\n\nmodule.exports = function () {\n\tvar assign = Object.assign, obj;\n\tif (typeof assign !== 'function') return false;\n\tobj = { foo: 'raz' };\n\tassign(obj, { bar: 'dwa' }, { trzy: 'trzy' });\n\treturn (obj.foo + obj.bar + obj.trzy) === 'razdwatrzy';\n};\n\n\n/*****************\n ** WEBPACK FOOTER\n ** ./~/event-emitter/~/es5-ext/object/assign/is-implemented.js\n ** module id = 12\n ** module chunks = 0\n **/\n//# sourceURL=webpack:///./~/event-emitter/~/es5-ext/object/assign/is-implemented.js?");
+
+/***/ },
+/* 13 */
+/***/ function(module, exports, __webpack_require__) {
+
+	eval("'use strict';\n\nvar keys  = __webpack_require__(17)\n  , value = __webpack_require__(16)\n\n  , max = Math.max;\n\nmodule.exports = function (dest, src/*, …srcn*/) {\n\tvar error, i, l = max(arguments.length, 2), assign;\n\tdest = Object(value(dest));\n\tassign = function (key) {\n\t\ttry { dest[key] = src[key]; } catch (e) {\n\t\t\tif (!error) error = e;\n\t\t}\n\t};\n\tfor (i = 1; i < l; ++i) {\n\t\tsrc = arguments[i];\n\t\tkeys(src).forEach(assign);\n\t}\n\tif (error !== undefined) throw error;\n\treturn dest;\n};\n\n\n/*****************\n ** WEBPACK FOOTER\n ** ./~/event-emitter/~/es5-ext/object/assign/shim.js\n ** module id = 13\n ** module chunks = 0\n **/\n//# sourceURL=webpack:///./~/event-emitter/~/es5-ext/object/assign/shim.js?");
+
+/***/ },
+/* 14 */
+/***/ function(module, exports, __webpack_require__) {
+
+	eval("'use strict';\n\nvar str = 'razdwatrzy';\n\nmodule.exports = function () {\n\tif (typeof str.contains !== 'function') return false;\n\treturn ((str.contains('dwa') === true) && (str.contains('foo') === false));\n};\n\n\n/*****************\n ** WEBPACK FOOTER\n ** ./~/event-emitter/~/es5-ext/string/#/contains/is-implemented.js\n ** module id = 14\n ** module chunks = 0\n **/\n//# sourceURL=webpack:///./~/event-emitter/~/es5-ext/string/#/contains/is-implemented.js?");
+
+/***/ },
+/* 15 */
+/***/ function(module, exports, __webpack_require__) {
+
+	eval("'use strict';\n\nvar indexOf = String.prototype.indexOf;\n\nmodule.exports = function (searchString/*, position*/) {\n\treturn indexOf.call(this, searchString, arguments[1]) > -1;\n};\n\n\n/*****************\n ** WEBPACK FOOTER\n ** ./~/event-emitter/~/es5-ext/string/#/contains/shim.js\n ** module id = 15\n ** module chunks = 0\n **/\n//# sourceURL=webpack:///./~/event-emitter/~/es5-ext/string/#/contains/shim.js?");
+
+/***/ },
+/* 16 */
+/***/ function(module, exports, __webpack_require__) {
+
+	eval("'use strict';\n\nmodule.exports = function (value) {\n\tif (value == null) throw new TypeError(\"Cannot use null or undefined\");\n\treturn value;\n};\n\n\n/*****************\n ** WEBPACK FOOTER\n ** ./~/event-emitter/~/es5-ext/object/valid-value.js\n ** module id = 16\n ** module chunks = 0\n **/\n//# sourceURL=webpack:///./~/event-emitter/~/es5-ext/object/valid-value.js?");
+
+/***/ },
+/* 17 */
+/***/ function(module, exports, __webpack_require__) {
+
+	eval("'use strict';\n\nmodule.exports = __webpack_require__(18)()\n\t? Object.keys\n\t: __webpack_require__(19);\n\n\n/*****************\n ** WEBPACK FOOTER\n ** ./~/event-emitter/~/es5-ext/object/keys/index.js\n ** module id = 17\n ** module chunks = 0\n **/\n//# sourceURL=webpack:///./~/event-emitter/~/es5-ext/object/keys/index.js?");
+
+/***/ },
+/* 18 */
+/***/ function(module, exports, __webpack_require__) {
+
+	eval("'use strict';\n\nmodule.exports = function () {\n\ttry {\n\t\tObject.keys('primitive');\n\t\treturn true;\n\t} catch (e) { return false; }\n};\n\n\n/*****************\n ** WEBPACK FOOTER\n ** ./~/event-emitter/~/es5-ext/object/keys/is-implemented.js\n ** module id = 18\n ** module chunks = 0\n **/\n//# sourceURL=webpack:///./~/event-emitter/~/es5-ext/object/keys/is-implemented.js?");
+
+/***/ },
+/* 19 */
+/***/ function(module, exports, __webpack_require__) {
+
+	eval("'use strict';\n\nvar keys = Object.keys;\n\nmodule.exports = function (object) {\n\treturn keys(object == null ? object : Object(object));\n};\n\n\n/*****************\n ** WEBPACK FOOTER\n ** ./~/event-emitter/~/es5-ext/object/keys/shim.js\n ** module id = 19\n ** module chunks = 0\n **/\n//# sourceURL=webpack:///./~/event-emitter/~/es5-ext/object/keys/shim.js?");
 
 /***/ }
 /******/ ])

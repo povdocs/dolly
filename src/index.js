@@ -3,6 +3,7 @@
 //dependencies
 var Vector = require('./vector');
 var assign = require('object-assign'); //todo: use babel
+var eventEmitter = require('event-emitter');
 
 var propId = 0;
 
@@ -42,6 +43,8 @@ function Prop(opts) {
 	this.goal = new Vector();
 	this.velocity = new Vector();
 	this.targets = [];
+
+	eventEmitter(this);
 }
 
 Prop.prototype.follow = function (prop, options) {
@@ -72,6 +75,8 @@ Prop.prototype.update = function (delta, tick) {
 
 	this.lastUpdate = tick;
 
+	this.emit('updatestart', this.position);
+
 	if (!this.targets.length) {
 		return;
 	}
@@ -88,12 +93,17 @@ Prop.prototype.update = function (delta, tick) {
 
 	//todo: set velocity toward goal and
 	this.velocity.copy(this.goal).scaleAndAdd(this.position, -1); //todo: scale by speed
+
+	this.emit('update', this.position, this.velocity);
+
 	this.position.scaleAndAdd(this.velocity, delta);
 
 	//todo: lerp with Points of Interest/Attractors
 
 	//fit within bounds
 	this.position.min(this.maxBounds).max(this.minBounds);
+
+	this.emit('updated', this.position);
 };
 
 function Dolly() {

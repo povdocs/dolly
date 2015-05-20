@@ -25,6 +25,10 @@ function makeVector(arg) {
 		return Vector.clone(arg);
 	}
 
+	if (arg && typeof arg === 'object') {
+		return new Vector(arg.x || 0, arg.y || 0, arg.z || 0);
+	}
+
 	return new Vector();
 }
 
@@ -39,6 +43,7 @@ function Prop(opts) {
 	this.position = makeVector(options.position);
 	this.minBounds = makeVector(options.minBounds === undefined ? -Infinity : options.minBounds);
 	this.maxBounds = makeVector(options.maxBounds === undefined ? Infinity : options.maxBounds);
+	this.speed = typeof options.speed === 'number' && !isNaN(options.speed) ? options.speed : 1;
 
 	this.goal = new Vector();
 	this.velocity = new Vector();
@@ -69,7 +74,7 @@ Prop.prototype.follow = function (prop, options) {
 
 Prop.prototype.update = function (delta, tick) {
 	var totalWeight = 0;
-	if (this.lastUpdate >= tick) {
+	if (this.lastUpdate >= tick || tick === undefined) {
 		return;
 	}
 
@@ -92,7 +97,8 @@ Prop.prototype.update = function (delta, tick) {
 	}
 
 	//todo: set velocity toward goal and
-	this.velocity.copy(this.goal).scaleAndAdd(this.position, -1); //todo: scale by speed
+	this.velocity.copy(this.goal).scaleAndAdd(this.position, -1);
+	this.velocity.scale(this.speed); //todo: replace with 1 / lag?, make sure we don't go past
 
 	this.emit('update', this.position, this.velocity);
 

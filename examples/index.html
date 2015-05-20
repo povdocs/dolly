@@ -53,9 +53,7 @@
 		});
 		prop.follow(tProp);
 
-		VR.animate(function (delta) {
-			dolly.update(delta);
-		});
+		VR.animate(dolly.update.bind(dolly));
 		</script>
 	</body>
 </html>

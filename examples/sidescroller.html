@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Dolly side scroller test</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+	</head>
+	<body>
+		<script type="text/javascript" src="//povdocs.github.io/webvr-starter-kit/build/vr.dev.js"></script>
+		<script type="text/javascript" src="../build/index.js" charset="utf-8"></script>
+		<script type="text/javascript">
+		var SPEED = 4;
+
+		var moveLeft = false;
+		var moveRight = false;
+
+		function keyDown(evt) {
+			switch (event.keyCode) {
+				case 37: //left
+				case 65: //a
+					moveLeft = true;
+					break;
+				case 39: //right
+				case 68: //d
+					moveRight = true;
+					break;
+				case 32: //space
+				case 38: //update
+				case 87: //w
+					//todo: jump
+					break;
+			}
+		}
+
+		function keyUp(evt) {
+			switch (event.keyCode) {
+				case 37: //left
+				case 65: //a
+					moveLeft = false;
+					break;
+				case 39: //right
+				case 68: //d
+					moveRight = false;
+					break;
+			}
+		}
+		document.addEventListener('keydown', keyDown, false);
+		document.addEventListener('keyup', keyUp, false);
+
+		VR.floor();
+		var dolly = new Dolly();
+
+		//player
+		var velocity = new THREE.Vector3();
+		var player = VR.box({ color: 'darkblue' })
+			.setScale(0.5, 2, 0.5)
+			.moveUp(1);
+		var playerProp = dolly.prop({
+			name: 'player'
+		});
+		playerProp.on('updatestart', function (position) {
+			position.copy(player.position);
+		});
+
+		//camera
+		var camProp = dolly.prop({
+			name: 'camera',
+			position: VR.body.position,
+			speed: 1
+		});
+		camProp.follow(playerProp, {
+			offset: [0, 2, 10]
+		});
+		camProp.on('updated', function (position) {
+			VR.body.position.copy(position);
+		});
+		// VR.body.position.y = 0;
+
+		VR.animate(function (delta) {
+			//decelerate player
+			velocity.x -= velocity.x * 2 * delta;
+			velocity.y -= 9.8 * 1 * delta; // 0.1 = mass
+
+			if (moveLeft) {
+				velocity.x -= SPEED * delta;
+			}
+			if (moveRight) {
+				velocity.x += SPEED * delta;
+			}
+
+			//todo: jump
+
+			player.moveX(velocity.x * delta);
+			player.moveY(velocity.y * delta);
+
+			//collisions with floor and stuff
+			if (player.position.y < 1) {
+				player.position.y = 1;
+				velocity.y = 0;
+				//todo: canJump = true;
+			}
+
+			dolly.update(delta);
+		});
+		</script>
+	</body>
+</html>

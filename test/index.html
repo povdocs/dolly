@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Dolly test</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+	</head>
+	<body>
+		<script type="text/javascript" src="//povdocs.github.io/webvr-starter-kit/build/vr.dev.js"></script>
+		<script type="text/javascript" src="../build/index.js" charset="utf-8"></script>
+		<script type="text/javascript">
+		VR.floor();
+		var dolly = new Dolly();
+
+		//object that does the following
+		var prop = dolly.prop({
+			name: 'object',
+			minBounds: [-2, 0.5, -0.5],
+			maxBounds: [2, 0.5, 0.5]
+		});
+		var box = VR.sphere({
+			color: 'darkblue'
+		}).moveUp(1);
+		prop.position.copy(box.position);
+
+		//fixed target
+		var base = VR.box({
+			material: 'wood'
+		}).scale.set(4, 0.1, 2);
+		var baseProp = dolly.prop({
+			name: 'base'
+		});
+		// prop.follow(baseProp, {
+		// 	offset: [0, 0.05, 0]
+		// });
+
+		//look target
+		var target = VR.camera.box().moveZ(-4).setScale(0.04);
+		var tPos = new THREE.Vector3();
+		var tProp = dolly.prop({
+			name: 'target'
+		});
+		prop.follow(tProp);
+
+		VR.animate(function (delta) {
+			tPos.copy(target.position);
+			target.object.localToWorld(tPos);
+			tProp.position.copy(tPos);
+
+			dolly.update(delta);
+
+			box.position.copy(prop.position);
+		});
+		</script>
+	</body>
+</html>

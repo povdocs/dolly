@@ -1,0 +1,23 @@
+{
+  "name": "dolly",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Brian Chirls",
+  "license": "MIT",
+  "devDependencies": {
+    "babel-core": "^5.4.3",
+    "babel-loader": "^5.1.2",
+    "jshint": "^2.7.0",
+    "jshint-loader": "^0.8.3",
+    "node-libs-browser": "^0.5.0",
+    "object-assign": "^2.0.0",
+    "webpack": "^1.9.7"
+  },
+  "dependencies": {
+    "gl-matrix-vec3": "^2.2.1-npm"
+  }
+}

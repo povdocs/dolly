@@ -54,6 +54,8 @@
 		document.addEventListener('keyup', keyUp, false);
 
 		VR.floor();
+		VR.camera.object.fov = 30;
+		VR.camera.object.updateProjectionMatrix();
 		var dolly = new Dolly();
 
 		//player
@@ -74,14 +76,14 @@
 		});
 
 		//camera
-		VR.body.position.set(0, 1, 10).add(player.position);
+		VR.body.position.set(0, 1, 20).add(player.position);
 		var camProp = dolly.prop({
 			name: 'camera',
 			position: VR.body.position,
 			speed: 1
 		});
 		camProp.follow([playerProp, lookAhead], {
-			offset: [0, 1, 10],
+			offset: [0, 1, 20],
 			radius: 0
 		});
 		camProp.on('updated', function (position) {
@@ -97,9 +99,19 @@
 			position: castle.position
 		});
 		camProp.attract(playerProp, castleScene, {
-			offset: [0, 6, 20],
+			offset: [0, 6, 40],
 			innerRadius: 10,
 			outerRadius: 14
+		});
+
+		//edge of the world
+		var edgeRight = dolly.prop({
+			position: [100, halfPlayer, 0]
+		});
+		camProp.attract(playerProp, edgeRight, {
+			offset: [2, halfPlayer / 2, 10],
+			innerRadius: 2,
+			outerRadius: 12
 		});
 
 		VR.animate(function (delta) {
@@ -118,6 +130,7 @@
 
 			player.moveX(velocity.x * delta);
 			player.moveY(velocity.y * delta);
+			player.position.x = Math.min(100, Math.max(-100, player.position.x));
 
 			//collisions with floor and stuff
 			if (player.position.y < halfPlayer) {

@@ -61,7 +61,7 @@ Vector.prototype.negate = function () {
 };
 
 Vector.prototype.normalize = function () {
-	vec3.negate(this.vec, this.vec);
+	vec3.normalize(this.vec, this.vec);
 	return this;
 };
 
@@ -112,8 +112,8 @@ Vector.prototype.squaredLength = function () {
 	'squaredDistance'
 ].forEach(function (key) {
 	var fn = vec3[key];
-	Vector.prototype[key] = function (vec) {
-		return fn(this.vec, vec);
+	Vector.prototype[key] = function (v) {
+		return fn(this.vec, v.vec);
 	};
 });
 

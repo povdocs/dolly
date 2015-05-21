@@ -43,11 +43,13 @@ function Prop(opts) {
 	this.position = makeVector(options.position);
 	this.minBounds = makeVector(options.minBounds === undefined ? -Infinity : options.minBounds);
 	this.maxBounds = makeVector(options.maxBounds === undefined ? Infinity : options.maxBounds);
-	this.speed = typeof options.speed === 'number' && !isNaN(options.speed) ? options.speed : 1;
+	this.speed = typeof options.speed === 'number' && !isNaN(options.speed) ? options.speed : 1; //todo: maxSpeed, lag
 
 	this.goal = new Vector();
+	this.attractorGoal = new Vector();
 	this.velocity = new Vector();
 	this.targets = [];
+	this.attractors = [];
 
 	eventEmitter(this);
 }
@@ -82,8 +84,39 @@ Prop.prototype.follow = function (prop, options) {
 	this.targets.push(target);
 };
 
+Prop.prototype.attract = function (prop, subject, options) {
+	var attractor;
+	var self = this;
+
+	if (Array.isArray(prop)) {
+		prop.forEach(function (p) {
+			self.attract(p, options);
+		});
+		return;
+	}
+
+	attractor = assign(
+		{
+			prop: prop, //the object that moves
+			subject: subject, //the point of interest
+			innerRadius: 0,
+			outerRadius: 0,
+			weight: 1
+		},
+		options,
+		{
+			offset: makeVector(options && options.offset),
+			offsetPosition: new Vector()
+		}
+	);
+
+	this.attractors.push(attractor);
+};
+
 Prop.prototype.update = function (delta, tick) {
 	var totalWeight = 0;
+	var totalAttraction = 0;
+
 	if (this.lastUpdate >= tick || tick === undefined) {
 		return;
 	}
@@ -96,14 +129,42 @@ Prop.prototype.update = function (delta, tick) {
 		return;
 	}
 
-	this.goal.zero();
-	this.targets.forEach((target) => {
-		totalWeight += target.weight;
-		target.offsetPosition.copy(target.prop.position).add(target.offset);
-		this.goal.scaleAndAdd(target.offsetPosition, target.weight);
+	this.attractorGoal.zero();
+	this.attractors.forEach((attractor) => {
+		var distance;
+		var attraction = 0;
+		// attractor.offsetPosition.copy(attractor.prop.position).add(attractor.offset);
+		distance = attractor.prop.position.distance(attractor.subject.position);
+		if (distance < attractor.outerRadius) {
+			attraction = Math.min(1, (attractor.outerRadius - distance) / (attractor.outerRadius - attractor.innerRadius));
+			totalAttraction += attraction * attractor.weight;
+			totalWeight += attractor.weight;
+
+			attractor.offsetPosition.copy(attractor.subject.position).add(attractor.offset);
+			this.attractorGoal.scaleAndAdd(attractor.offsetPosition, attractor.weight);
+		}
 	});
 	if (totalWeight) {
-		this.goal.scale(1 / totalWeight);
+		this.attractorGoal.scale(1 / totalWeight);
+		totalAttraction /= totalWeight;
+	}
+
+	totalWeight = 0;
+	this.goal.zero();
+	if (totalAttraction < 1) {
+		this.targets.forEach((target) => {
+			totalWeight += target.weight;
+			target.offsetPosition.copy(target.prop.position).add(target.offset);
+			this.goal.scaleAndAdd(target.offsetPosition, target.weight);
+		});
+		if (totalWeight) {
+			this.goal.scale(1 / totalWeight);
+		}
+		if (totalAttraction) {
+			this.goal.lerp(this.attractorGoal, totalAttraction);
+		}
+	} else {
+		this.goal.copy(this.attractorGoal);
 	}
 
 	//todo: set velocity toward goal and

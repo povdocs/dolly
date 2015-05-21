@@ -74,16 +74,32 @@
 		});
 
 		//camera
+		VR.body.position.set(0, 1, 10).add(player.position);
 		var camProp = dolly.prop({
 			name: 'camera',
 			position: VR.body.position,
 			speed: 1
 		});
 		camProp.follow([playerProp, lookAhead], {
-			offset: [0, 1, 10]
+			offset: [0, 1, 10],
+			radius: 0
 		});
 		camProp.on('updated', function (position) {
 			VR.body.position.copy(position);
+		});
+
+		//castle
+		var castle = VR.empty().moveX(40).moveZ(-4);
+		castle.box({ material: 'stone' }).setScale(12.5, 6, 1).moveUp(3);
+		castle.cylinder({ material: 'stone' }).setScale(6, 20, 6).moveUp(3).moveX(-9);
+		castle.cylinder({ material: 'stone' }).setScale(6, 20, 6).moveUp(3).moveX(9);
+		var castleScene = dolly.prop({
+			position: castle.position
+		});
+		camProp.attract(playerProp, castleScene, {
+			offset: [0, 6, 20],
+			innerRadius: 10,
+			outerRadius: 14
 		});
 
 		VR.animate(function (delta) {

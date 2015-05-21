@@ -68,8 +68,7 @@ Prop.prototype.follow = function (prop, options) {
 	target = assign(
 		{
 			prop: prop,
-			innerRadius: 0,
-			outerRadius: 0,
+			radius: 0,
 			minDistance: 0,
 			maxDistance: Infinity,
 			weight: 1
@@ -113,6 +112,7 @@ Prop.prototype.attract = function (prop, subject, options) {
 	this.attractors.push(attractor);
 };
 
+var scratch = new Vector();
 Prop.prototype.update = function (delta, tick) {
 	var totalWeight = 0;
 	var totalAttraction = 0;
@@ -153,9 +153,21 @@ Prop.prototype.update = function (delta, tick) {
 	this.goal.zero();
 	if (totalAttraction < 1) {
 		this.targets.forEach((target) => {
-			totalWeight += target.weight;
+			var distance;
+
 			target.offsetPosition.copy(target.prop.position).add(target.offset);
+
+			scratch.copy(target.offsetPosition).subtract(this.position); //vector towards target
+
+			target.offsetPosition.copy(this.position);
+			distance = scratch.length();
+			if (distance > target.radius) {
+				scratch.normalize().scale(distance - target.radius);
+				target.offsetPosition.add(scratch);
+			}
+
 			this.goal.scaleAndAdd(target.offsetPosition, target.weight);
+			totalWeight += target.weight;
 		});
 		if (totalWeight) {
 			this.goal.scale(1 / totalWeight);

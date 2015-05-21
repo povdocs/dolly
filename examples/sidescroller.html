@@ -84,7 +84,7 @@
 		});
 		camProp.follow([playerProp, lookAhead], {
 			offset: [0, 1, 20],
-			radius: 0
+			radius: 3
 		});
 		camProp.on('updated', function (position) {
 			VR.body.position.copy(position);

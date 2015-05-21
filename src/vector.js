@@ -76,7 +76,7 @@ Vector.prototype.scaleAndAdd = function (v, scale) {
 };
 
 Vector.prototype.lerp = function (v, t) {
-	vec3.lerp(this.vec, this.vec, v, t);
+	vec3.lerp(this.vec, this.vec, v.vec, t);
 	return this;
 };
 

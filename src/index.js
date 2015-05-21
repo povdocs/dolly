@@ -53,7 +53,17 @@ function Prop(opts) {
 }
 
 Prop.prototype.follow = function (prop, options) {
-	var target = assign(
+	var target;
+	var self = this;
+
+	if (Array.isArray(prop)) {
+		prop.forEach(function (p) {
+			self.follow(p, options);
+		});
+		return;
+	}
+
+	target = assign(
 		{
 			prop: prop,
 			innerRadius: 0,

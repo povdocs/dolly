@@ -10,7 +10,7 @@
 		<script type="text/javascript" src="../build/index.js" charset="utf-8"></script>
 		<script type="text/javascript">
 		var SPEED = 10;
-		var PLAYER_HEIGHT = 2;
+		var PLAYER_HEIGHT = 1;
 		var halfPlayer = PLAYER_HEIGHT / 2;
 
 		var moveLeft = false;
@@ -63,9 +63,14 @@
 			.moveUp(halfPlayer);
 		var playerProp = dolly.prop({
 			name: 'player'
-		});
-		playerProp.on('updatestart', function (position) {
+		}).on('updatestart', function (position) {
 			position.copy(player.position);
+		});
+
+		var lookAhead = dolly.prop().on('updatestart', function (position) {
+			position.copy(player.position);
+			position.x += velocity.x * 4;
+			position.y += velocity.y * 1;
 		});
 
 		//camera
@@ -74,7 +79,7 @@
 			position: VR.body.position,
 			speed: 1
 		});
-		camProp.follow(playerProp, {
+		camProp.follow([playerProp, lookAhead], {
 			offset: [0, 1, 10]
 		});
 		camProp.on('updated', function (position) {

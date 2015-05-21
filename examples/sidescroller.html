@@ -9,10 +9,13 @@
 		<script type="text/javascript" src="//povdocs.github.io/webvr-starter-kit/build/vr.dev.js"></script>
 		<script type="text/javascript" src="../build/index.js" charset="utf-8"></script>
 		<script type="text/javascript">
-		var SPEED = 4;
+		var SPEED = 10;
+		var PLAYER_HEIGHT = 2;
+		var halfPlayer = PLAYER_HEIGHT / 2;
 
 		var moveLeft = false;
 		var moveRight = false;
+		var canJump = true;
 
 		function keyDown(evt) {
 			switch (event.keyCode) {
@@ -27,7 +30,10 @@
 				case 32: //space
 				case 38: //update
 				case 87: //w
-					//todo: jump
+					if (canJump) {
+						velocity.y += 8;
+						canJump = false;
+					}
 					break;
 			}
 		}
@@ -53,8 +59,8 @@
 		//player
 		var velocity = new THREE.Vector3();
 		var player = VR.box({ color: 'darkblue' })
-			.setScale(0.5, 2, 0.5)
-			.moveUp(1);
+			.setScale(0.5, PLAYER_HEIGHT, 0.5)
+			.moveUp(halfPlayer);
 		var playerProp = dolly.prop({
 			name: 'player'
 		});
@@ -69,12 +75,11 @@
 			speed: 1
 		});
 		camProp.follow(playerProp, {
-			offset: [0, 2, 10]
+			offset: [0, 1, 10]
 		});
 		camProp.on('updated', function (position) {
 			VR.body.position.copy(position);
 		});
-		// VR.body.position.y = 0;
 
 		VR.animate(function (delta) {
 			//decelerate player
@@ -88,16 +93,16 @@
 				velocity.x += SPEED * delta;
 			}
 
-			//todo: jump
+			//todo: land on platform?
 
 			player.moveX(velocity.x * delta);
 			player.moveY(velocity.y * delta);
 
 			//collisions with floor and stuff
-			if (player.position.y < 1) {
-				player.position.y = 1;
+			if (player.position.y < halfPlayer) {
+				player.position.y = halfPlayer;
 				velocity.y = 0;
-				//todo: canJump = true;
+				canJump = true;
 			}
 
 			dolly.update(delta);

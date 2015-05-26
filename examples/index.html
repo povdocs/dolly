@@ -34,17 +34,13 @@
 		var baseProp = dolly.prop({
 			name: 'base'
 		});
-		// prop.follow(baseProp, {
-		// 	offset: [0, 0.05, 0]
-		// });
 
 		//look target
 		var target = VR.camera.box().moveZ(-4).setScale(0.04);
 		var tPos = new THREE.Vector3();
 		var tProp = dolly.prop({
 			name: 'target'
-		});
-		tProp.on('updatestart', function () {
+		}).on('updatestart', function () {
 			//calculate world position of three.js object
 			tPos.copy(target.position);
 			target.object.localToWorld(tPos);
@@ -52,6 +48,7 @@
 			//update position of prop
 			tProp.position.copy(tPos);
 		});
+
 		prop.follow(tProp);
 
 		VR.animate(dolly.update.bind(dolly));

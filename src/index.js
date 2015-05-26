@@ -83,6 +83,8 @@ Prop.prototype.follow = function (prop, options) {
 	);
 
 	this.targets.push(target);
+
+	return this;
 };
 
 Prop.prototype.attract = function (prop, subject, options) {
@@ -113,6 +115,8 @@ Prop.prototype.attract = function (prop, subject, options) {
 	);
 
 	this.attractors.push(attractor);
+
+	return this;
 };
 
 Prop.prototype.update = function (delta, tick) {
@@ -210,6 +214,8 @@ Prop.prototype.update = function (delta, tick) {
 	this.position.min(this.maxBounds).max(this.minBounds);
 
 	this.emit('updated', this.position);
+
+	return this;
 };
 
 function Dolly() {
@@ -229,6 +235,8 @@ function Dolly() {
 		});
 
 		updating = false;
+
+		return this;
 	};
 
 	this.prop = function (options) {

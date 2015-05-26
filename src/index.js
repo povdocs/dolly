@@ -6,6 +6,7 @@ var assign = require('object-assign'); //todo: use babel
 var eventEmitter = require('event-emitter');
 
 var propId = 0;
+var scratch = new Vector();
 
 function makeVector(arg) {
 	function V() {
@@ -43,7 +44,7 @@ function Prop(opts) {
 	this.position = makeVector(options.position);
 	this.minBounds = makeVector(options.minBounds === undefined ? -Infinity : options.minBounds);
 	this.maxBounds = makeVector(options.maxBounds === undefined ? Infinity : options.maxBounds);
-	this.speed = typeof options.speed === 'number' && !isNaN(options.speed) ? options.speed : 1; //todo: maxSpeed, lag
+	this.lag = typeof options.lag === 'number' && !isNaN(options.lag) ? options.lag : 0;
 
 	this.goal = new Vector();
 	this.attractorGoal = new Vector();
@@ -112,7 +113,6 @@ Prop.prototype.attract = function (prop, subject, options) {
 	this.attractors.push(attractor);
 };
 
-var scratch = new Vector();
 Prop.prototype.update = function (delta, tick) {
 	var totalWeight = 0;
 	var totalAttraction = 0;
@@ -179,15 +179,16 @@ Prop.prototype.update = function (delta, tick) {
 		this.goal.copy(this.attractorGoal);
 	}
 
-	//todo: set velocity toward goal and
-	this.velocity.copy(this.goal).scaleAndAdd(this.position, -1);
-	this.velocity.scale(this.speed); //todo: replace with 1 / lag?, make sure we don't go past
+	this.velocity.copy(this.goal).subtract(this.position);
+	if (this.lag) {
+		this.velocity.scale(Math.pow(delta, this.lag));
+	}
+
+	//todo: cap velocity to maxSpeed
 
 	this.emit('update', this.position, this.velocity);
 
-	this.position.scaleAndAdd(this.velocity, delta);
-
-	//todo: lerp with Points of Interest/Attractors
+	this.position.add(this.velocity);
 
 	//fit within bounds
 	this.position.min(this.maxBounds).max(this.minBounds);

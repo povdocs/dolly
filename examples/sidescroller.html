@@ -71,8 +71,8 @@
 
 		var lookAhead = dolly.prop().on('updatestart', function (position) {
 			position.copy(player.position);
-			position.x += velocity.x * 4;
-			position.y += velocity.y * 1;
+			position.x += velocity.x * 2;
+			position.y += velocity.y * 0.1;
 		});
 
 		//camera
@@ -80,11 +80,11 @@
 		var camProp = dolly.prop({
 			name: 'camera',
 			position: VR.body.position,
-			speed: 1
+			lag: 0.8
 		});
 		camProp.follow([playerProp, lookAhead], {
 			offset: [0, 1, 20],
-			radius: 3
+			radius: 1
 		});
 		camProp.on('updated', function (position) {
 			VR.body.position.copy(position);

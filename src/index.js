@@ -45,6 +45,7 @@ function Prop(opts) {
 	this.minBounds = makeVector(options.minBounds === undefined ? -Infinity : options.minBounds);
 	this.maxBounds = makeVector(options.maxBounds === undefined ? Infinity : options.maxBounds);
 	this.lag = typeof options.lag === 'number' && !isNaN(options.lag) ? options.lag : 0;
+	this.maxSpeed = typeof options.maxSpeed === 'number' && !isNaN(options.maxSpeed) ? options.maxSpeed : Infinity;
 
 	this.goal = new Vector();
 	this.attractorGoal = new Vector();
@@ -184,7 +185,10 @@ Prop.prototype.update = function (delta, tick) {
 		this.velocity.scale(Math.pow(delta, this.lag));
 	}
 
-	//todo: cap velocity to maxSpeed
+	//cap velocity to maxSpeed
+	if (this.maxSpeed && this.maxSpeed < Infinity && this.maxSpeed < this.velocity.length()) {
+		this.velocity.normalize().scale(this.maxSpeed);
+	}
 
 	this.emit('update', this.position, this.velocity);
 

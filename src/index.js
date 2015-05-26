@@ -107,7 +107,8 @@ Prop.prototype.attract = function (prop, subject, options) {
 		options,
 		{
 			offset: makeVector(options && options.offset),
-			offsetPosition: new Vector()
+			offsetPosition: new Vector(),
+			attraction: 0
 		}
 	);
 
@@ -134,7 +135,8 @@ Prop.prototype.update = function (delta, tick) {
 	this.attractors.forEach((attractor) => {
 		var distance;
 		var attraction = 0;
-		// attractor.offsetPosition.copy(attractor.prop.position).add(attractor.offset);
+		var lastAttraction = attractor.attraction;
+
 		distance = attractor.prop.position.distance(attractor.subject.position);
 		if (distance < attractor.outerRadius) {
 			attraction = Math.min(1, (attractor.outerRadius - distance) / (attractor.outerRadius - attractor.innerRadius));
@@ -143,6 +145,16 @@ Prop.prototype.update = function (delta, tick) {
 
 			attractor.offsetPosition.copy(attractor.subject.position).add(attractor.offset);
 			this.attractorGoal.scaleAndAdd(attractor.offsetPosition, attractor.weight);
+
+			attractor.attraction = attraction;
+			if (!lastAttraction) {
+				attractor.prop.emit('enterattractor', attractor.subject, attraction);
+			} else if (lastAttraction !== attraction) {
+				attractor.prop.emit('moveattractor', attractor.subject, attraction);
+			}
+		} else if (attractor.attraction) {
+			attractor.attraction = attraction;
+			attractor.prop.emit('leaveattractor', attractor.subject);
 		}
 	});
 	if (totalWeight) {

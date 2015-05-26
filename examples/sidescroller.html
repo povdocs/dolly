@@ -104,6 +104,21 @@
 			outerRadius: 14
 		});
 
+		var castleTitle = castle.text('Welcome to the castle!').moveUp(30).setScale(3);
+		castleTitle.visible = false;
+		playerProp.on('enterattractor', function (prop, att) {
+			console.log('approaching castle');
+			castleTitle.visible = true;
+			castleTitle.position.y = 20 - 10 * att;
+		});
+		playerProp.on('moveattractor', function (prop, att) {
+			castleTitle.position.y = 20 - 10 * att;
+		});
+		playerProp.on('leaveattractor', function () {
+			castleTitle.visible = false;
+			console.log('left castle');
+		});
+
 		//edge of the world
 		var edgeRight = dolly.prop({
 			position: [100, halfPlayer, 0]

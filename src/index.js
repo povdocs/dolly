@@ -228,6 +228,7 @@ function Dolly() {
 	var tick = -1;
 	var props = [];
 	var updating = false;
+	var self = this;
 
 	this.update = function (delta) {
 		if (updating) {
@@ -242,7 +243,7 @@ function Dolly() {
 
 		updating = false;
 
-		return this;
+		return self;
 	};
 
 	this.prop = function (options) {

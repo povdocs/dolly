@@ -6,7 +6,10 @@ var assign = require('object-assign'); //todo: use babel
 var eventEmitter = require('event-emitter');
 
 var propId = 0;
+
+//scratch vectors so we don't have to re-allocate all the time (too slow)
 var scratch = new Vector();
+var totalWeight = new Vector();
 
 function makeVector(arg) {
 	function V() {
@@ -31,6 +34,19 @@ function makeVector(arg) {
 	}
 
 	return new Vector();
+}
+
+function safeDivide(a, b) {
+	var va = a.vec,
+		vb = b.vec,
+		i,
+		denom;
+	for (i = 0; i <3; i++) {
+		denom = vb[i];
+		if (denom) {
+			va[i] = va[i] / denom;
+		}
+	}
 }
 
 function Prop(opts) {
@@ -59,12 +75,22 @@ function Prop(opts) {
 Prop.prototype.follow = function (prop, options) {
 	var target;
 	var self = this;
+	var weight;
 
 	if (Array.isArray(prop)) {
 		prop.forEach(function (p) {
 			self.follow(p, options);
 		});
 		return;
+	}
+
+	if (!(prop instanceof Prop)) {
+		throw new Error('Attempt to follow object that is not a Prop');
+	}
+
+	weight = options && options.weight;
+	if (weight === undefined || isNaN(weight) && typeof weight === 'number') {
+		weight = 1;
 	}
 
 	target = assign(
@@ -77,6 +103,7 @@ Prop.prototype.follow = function (prop, options) {
 		},
 		options,
 		{
+			weight: makeVector(weight),
 			offset: makeVector(options && options.offset),
 			offsetPosition: new Vector()
 		}
@@ -96,6 +123,10 @@ Prop.prototype.attract = function (prop, subject, options) {
 			self.attract(p, options);
 		});
 		return;
+	}
+
+	if (!(prop instanceof Prop) || !(subject instanceof Prop)) {
+		throw new Error('Attempt to follow object that is not a Prop');
 	}
 
 	attractor = assign(
@@ -120,7 +151,7 @@ Prop.prototype.attract = function (prop, subject, options) {
 };
 
 Prop.prototype.update = function (delta, tick) {
-	var totalWeight = 0;
+	var totalAttractionWeight = 0;
 	var totalAttraction = 0;
 
 	//prevent infinite loops if follower graph is cyclical
@@ -149,7 +180,7 @@ Prop.prototype.update = function (delta, tick) {
 		if (distance < attractor.outerRadius) {
 			attraction = Math.min(1, (attractor.outerRadius - distance) / (attractor.outerRadius - attractor.innerRadius));
 			totalAttraction += attraction * attractor.weight;
-			totalWeight += attractor.weight;
+			totalAttractionWeight += attractor.weight;
 
 			attractor.offsetPosition.copyVector(attractor.subject.position).add(attractor.offset);
 			this.attractorGoal.scaleAndAdd(attractor.offsetPosition, attractor.weight);
@@ -165,12 +196,12 @@ Prop.prototype.update = function (delta, tick) {
 			attractor.prop.emit('leaveattractor', attractor.subject);
 		}
 	});
-	if (totalWeight) {
-		this.attractorGoal.scale(1 / totalWeight);
-		totalAttraction /= totalWeight;
+	if (totalAttractionWeight) {
+		this.attractorGoal.scale(1 / totalAttractionWeight);
+		totalAttraction /= totalAttractionWeight;
 	}
 
-	totalWeight = 0;
+	totalWeight.zero();
 	this.goal.zero();
 	if (totalAttraction < 1) {
 		this.targets.forEach((target) => {
@@ -189,11 +220,12 @@ Prop.prototype.update = function (delta, tick) {
 				target.offsetPosition.add(scratch);
 			}
 
-			this.goal.scaleAndAdd(target.offsetPosition, target.weight);
-			totalWeight += target.weight;
+			target.offsetPosition.multiply(target.weight);
+			this.goal.add(target.offsetPosition);
+			totalWeight.add(target.weight);
 		});
-		if (totalWeight) {
-			this.goal.scale(1 / totalWeight);
+		if (totalWeight.length()) {
+			safeDivide(this.goal, totalWeight);
 		}
 		if (totalAttraction) {
 			this.goal.lerp(this.attractorGoal, totalAttraction);

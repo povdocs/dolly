@@ -56,32 +56,65 @@
 		VR.floor();
 		VR.camera.object.fov = 30;
 		VR.camera.object.updateProjectionMatrix();
+
+		/*
+		Create a Dolly object that manages the whole scene
+		This is separate data from the THREE.js scene, so the two must be reconciled after each updates
+		*/
 		var dolly = new Dolly();
 
-		//player
-		var velocity = new THREE.Vector3();
+		/*
+		Data and objects related to the "player"
+		*/
+
+		//visible player object
 		var player = VR.box({ color: 'darkblue' })
 			.setScale(0.5, PLAYER_HEIGHT, 0.5)
 			.moveUp(halfPlayer);
+
+		//vector representing the velocity of the player
+		var velocity = new THREE.Vector3();
+
+		//a Prop representing the player, which is followed by the camera
 		var playerProp = dolly.prop({
 			name: 'player'
-		}).on('updatestart', function (position) {
-			position.copy(player.position);
+		}).on('updatestart', function () {
+			/*
+			The position of the THREE.js player object is set by the animation loop below. We need to copy it over to the "prop" every time the Dolly
+			instance is updated. "updatestart" runs at the beginning of the process.
+			*/
+			playerProp.position.copy(player.position);
 		});
 
+		/*
+		lookAhead is an invisible prop that leads ahead of the player in whichever
+		direction it's moving. Putting the camera a little bit ahead of the player lets you see more of what's in front of it so there are no surprises.
+		*/
 		var lookAhead = dolly.prop().on('updatestart', function (position) {
 			position.copy(player.position);
 			position.x += velocity.x * 1.5;
 			position.y += velocity.y * 0.1;
 		});
 
-		//camera
+		/*
+		Data and objects related to the camera
+		*/
+
+		//Move the "body" not the camera
 		VR.body.position.set(0, 1, 20).add(player.position);
+
+		//camera prop that follows the player
 		var camProp = dolly.prop({
 			name: 'camera',
 			position: VR.body.position,
 			lag: 0.8
 		});
+
+		/*
+		camProp follows both the player and the lookAhead. The target point is the weighted average of the two objects. playerProp has a weight of zero along the x axis, so its position only contributes to the vertical movemenet of the camera. Horizontal movement is entirely controlled by the lookAhead prop.
+
+		setting "radius" to 2 creates a 2-meter buffer around the player object to keep the camera from over-reacting to small movements or back-tracking after the player slows down.
+		*/
 		camProp.follow(playerProp, {
 			offset: [0, 1, 20],
 			weight: [0, 1, 0],
@@ -91,24 +124,39 @@
 			offset: [0, 1, 20],
 			radius: 2
 		});
+
+		//after the camera prop is updated by Dolly, copy the position over to the THREE.js "body" object (which in turn moves the camera)
 		camProp.on('updated', function (position) {
 			VR.body.position.copy(position);
 		});
 
-		//castle
+		/*
+		Build a castle to demonstrate the "attractor" feature. An attractor is a point of interest that takes over the camera view as one prop approaches another.
+		*/
+
+		//build the visible castle object
 		var castle = VR.empty().moveX(40).moveZ(-4);
 		castle.box({ material: 'stone' }).setScale(12.5, 6, 1).moveUp(3);
 		castle.cylinder({ material: 'stone' }).setScale(6, 20, 6).moveUp(3).moveX(-9);
 		castle.cylinder({ material: 'stone' }).setScale(6, 20, 6).moveUp(3).moveX(9);
+
+		//the corresponding prop
 		var castleScene = dolly.prop({
 			position: castle.position
 		});
+
+		/*
+		Set up the prop as an attractor. playerProp is the prop that triggers the transition by approaching the subject, and castleScene is the subject to be approached. camProp is the prop that's moved by the attractor, and offset is the position relative to the castle where we want to move the camera
+		*/
 		camProp.attract(playerProp, castleScene, {
 			offset: [0, 6, 40],
 			innerRadius: 10,
 			outerRadius: 14
 		});
 
+		/*
+		Display some text above the castle and fly it in to demonstrate some events that are triggered by an attractor
+		*/
 		var castleTitle = castle.text('Welcome to the castle!').moveUp(30).setScale(3);
 		castleTitle.visible = false;
 		playerProp.on('enterattractor', function (prop, att) {
@@ -135,10 +183,11 @@
 		});
 
 		VR.animate(function (delta) {
-			//decelerate player
+			//decelerate player - friction with the floor and gravity
 			velocity.x -= velocity.x * 2 * delta;
 			velocity.y -= 9.8 * 1 * delta; // 0.1 = mass
 
+			//accelerate player when left/right key pressed
 			if (moveLeft) {
 				velocity.x -= SPEED * delta;
 			}
@@ -146,13 +195,11 @@
 				velocity.x += SPEED * delta;
 			}
 
-			//todo: land on platform?
-
 			player.moveX(velocity.x * delta);
 			player.moveY(velocity.y * delta);
 			player.position.x = Math.min(100, Math.max(-100, player.position.x));
 
-			//collisions with floor and stuff
+			//collisions with floor
 			if (player.position.y < halfPlayer) {
 				player.position.y = halfPlayer;
 				velocity.y = 0;

@@ -123,6 +123,7 @@ Prop.prototype.update = function (delta, tick) {
 	var totalWeight = 0;
 	var totalAttraction = 0;
 
+	//prevent infinite loops if follower graph is cyclical
 	if (this.lastUpdate >= tick || tick === undefined) {
 		return;
 	}
@@ -140,6 +141,9 @@ Prop.prototype.update = function (delta, tick) {
 		var distance;
 		var attraction = 0;
 		var lastAttraction = attractor.attraction;
+
+		attractor.prop.update(delta, tick);
+		attractor.subject.update(delta, tick);
 
 		distance = attractor.prop.position.distance(attractor.subject.position);
 		if (distance < attractor.outerRadius) {
@@ -171,6 +175,8 @@ Prop.prototype.update = function (delta, tick) {
 	if (totalAttraction < 1) {
 		this.targets.forEach((target) => {
 			var distance;
+
+			target.prop.update(delta, tick);
 
 			target.offsetPosition.copy(target.prop.position).add(target.offset);
 

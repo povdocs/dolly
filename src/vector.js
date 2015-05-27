@@ -40,8 +40,13 @@ Vector.prototype.copy = function (v) {
 	if (v instanceof Vector) {
 		vec3.copy(this.vec, v.vec);
 	} else if (typeof v === 'object' && v) {
-		this.set(v.x, v.y, v.z);
+		this.set(v.x || 0, v.y || 0, v.z || 0);
 	}
+	return this;
+};
+
+Vector.prototype.copyVector = function (v) {
+	vec3.copy(this.vec, v.vec);
 	return this;
 };
 

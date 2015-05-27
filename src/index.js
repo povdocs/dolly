@@ -151,7 +151,7 @@ Prop.prototype.update = function (delta, tick) {
 			totalAttraction += attraction * attractor.weight;
 			totalWeight += attractor.weight;
 
-			attractor.offsetPosition.copy(attractor.subject.position).add(attractor.offset);
+			attractor.offsetPosition.copyVector(attractor.subject.position).add(attractor.offset);
 			this.attractorGoal.scaleAndAdd(attractor.offsetPosition, attractor.weight);
 
 			attractor.attraction = attraction;
@@ -178,11 +178,11 @@ Prop.prototype.update = function (delta, tick) {
 
 			target.prop.update(delta, tick);
 
-			target.offsetPosition.copy(target.prop.position).add(target.offset);
+			target.offsetPosition.copyVector(target.prop.position).add(target.offset);
 
-			scratch.copy(target.offsetPosition).subtract(this.position); //vector towards target
+			scratch.copyVector(target.offsetPosition).subtract(this.position); //vector towards target
 
-			target.offsetPosition.copy(this.position);
+			target.offsetPosition.copyVector(this.position);
 			distance = scratch.length();
 			if (distance > target.radius) {
 				scratch.normalize().scale(distance - target.radius);
@@ -199,10 +199,10 @@ Prop.prototype.update = function (delta, tick) {
 			this.goal.lerp(this.attractorGoal, totalAttraction);
 		}
 	} else {
-		this.goal.copy(this.attractorGoal);
+		this.goal.copyVector(this.attractorGoal);
 	}
 
-	this.velocity.copy(this.goal).subtract(this.position);
+	this.velocity.copyVector(this.goal).subtract(this.position);
 	if (this.lag) {
 		this.velocity.scale(Math.pow(delta, this.lag));
 	}

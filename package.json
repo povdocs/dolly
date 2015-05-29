@@ -1,8 +1,8 @@
 {
   "name": "dolly",
   "version": "0.0.1",
-  "description": "A JavaScript library for objects to follow other objects",
-  "main": "build/index.js",
+  "description": "A JavaScript library for objects to follow other objects in 3D space",
+  "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

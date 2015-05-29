@@ -285,4 +285,4 @@ function Dolly() {
 	};
 }
 
-module.exports.Dolly = Dolly;
+module.exports = Dolly;

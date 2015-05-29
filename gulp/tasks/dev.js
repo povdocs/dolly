@@ -2,9 +2,10 @@
 
 var gulp = require('gulp');
 var webpack = require('gulp-webpack');
-var config = require('../../config');
 
 gulp.task('dev', function () {
+	var config = require('../../config');
+
 	return gulp.src('src/index.js')
 		.pipe(webpack(config.dev))
 		.pipe(gulp.dest('dist'));

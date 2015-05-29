@@ -79,7 +79,8 @@ module.exports = (function () {
 		output: {
 			filename: 'dolly.js',
 			pathInfo: true,
-			libraryTarget: 'umd'
+			libraryTarget: 'umd',
+			library: 'Dolly'
 		}
 	});
 
@@ -88,7 +89,8 @@ module.exports = (function () {
 		output: {
 			filename: 'dolly.js',
 			sourceMapFilename: '[file].map',
-			libraryTarget: 'umd'
+			libraryTarget: 'umd',
+			library: 'Dolly'
 		},
 		plugins: [
 			new webpack.DefinePlugin({

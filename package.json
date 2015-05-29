@@ -19,13 +19,16 @@
   "devDependencies": {
     "babel-core": "^5.4.3",
     "babel-loader": "^5.1.2",
+    "del": "^1.2.0",
+    "gulp": "^3.8.11",
+    "gulp-webpack": "^1.4.0",
     "jshint": "^2.7.0",
     "jshint-loader": "^0.8.3",
     "node-libs-browser": "^0.5.0",
-    "object-assign": "^2.0.0",
     "webpack": "^1.9.7"
   },
   "dependencies": {
+    "object-assign": "^2.0.0",
     "event-emitter": "^0.3.3",
     "gl-matrix-vec3": "^2.2.1-npm"
   }

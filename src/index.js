@@ -179,7 +179,7 @@ Prop.prototype.update = function (delta, tick) {
 		distance = attractor.prop.position.distance(attractor.subject.position);
 		if (distance < attractor.outerRadius) {
 			attraction = Math.min(1, (attractor.outerRadius - distance) / (attractor.outerRadius - attractor.innerRadius));
-			totalAttraction += attraction * attractor.weight;
+			totalAttraction = Math.max(totalAttraction, attraction * attractor.weight);
 			totalAttractionWeight += attractor.weight;
 
 			attractor.offsetPosition.copyVector(attractor.subject.position).add(attractor.offset);
@@ -198,7 +198,6 @@ Prop.prototype.update = function (delta, tick) {
 	});
 	if (totalAttractionWeight) {
 		this.attractorGoal.scale(1 / totalAttractionWeight);
-		totalAttraction /= totalAttractionWeight;
 	}
 
 	totalWeight.zero();

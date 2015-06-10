@@ -66,6 +66,7 @@ function Prop(opts) {
 	this.goal = new Vector();
 	this.attractorGoal = new Vector();
 	this.velocity = new Vector();
+	this.lastPosition = Vector.clone(this.position);
 	this.targets = [];
 	this.attractors = [];
 
@@ -167,6 +168,8 @@ Prop.prototype.update = function (delta, tick) {
 		return;
 	}
 
+	this.lastPosition.copyVector(this.position);
+
 	this.attractorGoal.zero();
 	this.attractors.forEach((attractor) => {
 		var distance;
@@ -255,6 +258,10 @@ Prop.prototype.update = function (delta, tick) {
 	return this;
 };
 
+Prop.prototype.active = function () {
+	return this.position.distance(this.lastPosition) > 0.000001;
+};
+
 function Dolly() {
 	var tick = -1;
 	var props = [];
@@ -281,6 +288,16 @@ function Dolly() {
 		var prop = new Prop(options);
 		props.push(prop);
 		return prop;
+	};
+
+	this.active = function () {
+		var i;
+		for (i = 0; i < props.length; i++) {
+			if (props[i].active()) {
+				return true;
+			}
+		}
+		return false;
 	};
 }
 

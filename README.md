@@ -7,6 +7,8 @@ Dolly is inspired by [The Theory and Practice of Cameras in Side-Scrollers](http
 ## Examples
 
 - [Line Chart](https://povdocs.github.io/dolly-chart-example) ([source](https://github.com/povdocs/dolly-chart-example)) using 2d canvas
+- [Side Scroller](http://povdocs.github.io/dolly/examples/sidescroller.html) a mock-up of a side-scroller game using WebGL
+- [WebVR](http://povdocs.github.io/dolly/examples/) Basic VR example - ball rolls toward where user looks, within constraints
 
 ## Installation
 

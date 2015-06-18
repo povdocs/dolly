@@ -157,12 +157,12 @@ return /******/ (function(modules) { // webpackBootstrap
 		}
 	
 		target = assign({
-			prop: prop,
 			radius: 0,
-			minDistance: 0,
-			maxDistance: Infinity,
+			// minDistance: 0, //not implemented yet
+			// maxDistance: Infinity, //not implemented yet
 			weight: 1
 		}, options, {
+			prop: prop,
 			weight: makeVector(weight),
 			offset: makeVector(options && options.offset),
 			offsetPosition: new Vector()
@@ -189,12 +189,12 @@ return /******/ (function(modules) { // webpackBootstrap
 		}
 	
 		attractor = assign({
-			prop: prop, //the object that moves
-			subject: subject, //the point of interest
 			innerRadius: 0,
 			outerRadius: 0,
 			weight: 1
 		}, options, {
+			prop: prop, //the object that moves
+			subject: subject, //the point of interest
 			offset: makeVector(options && options.offset),
 			offsetPosition: new Vector(),
 			attraction: 0
@@ -246,13 +246,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 				attractor.attraction = attraction;
 				if (!lastAttraction) {
-					attractor.prop.emit('enterattractor', attractor.subject, attraction);
+					_this.emit('enterattractor', attractor.prop, attractor.subject, attraction);
 				} else if (lastAttraction !== attraction) {
-					attractor.prop.emit('moveattractor', attractor.subject, attraction);
+					_this.emit('moveattractor', attractor.prop, attractor.subject, attraction);
 				}
 			} else if (attractor.attraction) {
 				attractor.attraction = attraction;
-				attractor.prop.emit('leaveattractor', attractor.subject);
+				_this.emit('leaveattractor', attractor.prop, attractor.subject);
 			}
 		});
 		if (totalAttractionWeight) {

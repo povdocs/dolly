@@ -96,14 +96,14 @@ Prop.prototype.follow = function (prop, options) {
 
 	target = assign(
 		{
-			prop: prop,
 			radius: 0,
-			minDistance: 0,
-			maxDistance: Infinity,
+			// minDistance: 0, //not implemented yet
+			// maxDistance: Infinity, //not implemented yet
 			weight: 1
 		},
 		options,
 		{
+			prop: prop,
 			weight: makeVector(weight),
 			offset: makeVector(options && options.offset),
 			offsetPosition: new Vector()
@@ -132,14 +132,14 @@ Prop.prototype.attract = function (prop, subject, options) {
 
 	attractor = assign(
 		{
-			prop: prop, //the object that moves
-			subject: subject, //the point of interest
 			innerRadius: 0,
 			outerRadius: 0,
 			weight: 1
 		},
 		options,
 		{
+			prop: prop, //the object that moves
+			subject: subject, //the point of interest
 			offset: makeVector(options && options.offset),
 			offsetPosition: new Vector(),
 			attraction: 0
@@ -190,13 +190,13 @@ Prop.prototype.update = function (delta, tick) {
 
 			attractor.attraction = attraction;
 			if (!lastAttraction) {
-				attractor.prop.emit('enterattractor', attractor.subject, attraction);
+				this.emit('enterattractor', attractor.prop, attractor.subject, attraction);
 			} else if (lastAttraction !== attraction) {
-				attractor.prop.emit('moveattractor', attractor.subject, attraction);
+				this.emit('moveattractor', attractor.prop, attractor.subject, attraction);
 			}
 		} else if (attractor.attraction) {
 			attractor.attraction = attraction;
-			attractor.prop.emit('leaveattractor', attractor.subject);
+			this.emit('leaveattractor', attractor.prop, attractor.subject);
 		}
 	});
 	if (totalAttractionWeight) {

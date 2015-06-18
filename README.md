@@ -165,6 +165,20 @@ Fires when a follow prop moves outside the `outerRadius` of an attractor and the
 - Define object constraints by their own local coordinates, accounting for rotation
 - Move along a Z axis to keep multiple targets in view
 
+## Build
+
+To generate your own build:
+
+1. Install node/npm
+    - Download at https://nodejs.org
+    - or install with a package manager like homebrew
+2. Install gulp globally: `npm install -g gulp`
+3. run `npm install` to install necessary npm modules
+4. compile JavaScript
+    - for development using "eval" for source maps: `gulp dev`
+    - for distribution, generating an unminified file: `gulp dist`
+    - for distribution, generating a minified file: `gulp min`
+
 ## License
 Original code is made avalable under [MIT License](http://www.opensource.org/licenses/mit-license.php), Copyright (c) 2015 American Documentary Inc.
 

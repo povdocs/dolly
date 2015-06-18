@@ -1,6 +1,6 @@
 {
   "name": "dolly",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A JavaScript library for objects to follow other objects in 3D space",
   "main": "dist/dolly.js",
   "scripts": {

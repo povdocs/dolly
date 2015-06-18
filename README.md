@@ -69,6 +69,8 @@ Prop objects cannot be created with a constructor. They are created by calling t
 
 ### Methods
 
+All methods except `active` return the object, so calls can be chained.
+
 #### `follow(prop, options)`
 
 Takes one parameter, an object representing a hash of options.
@@ -99,6 +101,64 @@ Returns a boolean indicating whether this prop has moved in the last update.
 
 ##### Parameters
 - `epsilon` - An optional margin of error used to determine whether an object has moved. Sometimes props move a very small amount that won't show up in the output. Default is `0.00001`.
+
+### Events
+
+`Prop` objects support a number of event callbacks, which can be registered using the [event emitter](https://github.com/medikoo/event-emitter) interface.
+
+#### updatestart
+
+Fires before this prop is about to be updated. This is a good place to set the position of an object that is being followed, when it's being determined by other code, like a physics engine or keyboard/mouse controls.
+
+##### Callback parameters
+
+- `position` - a vector representing the position of this prop
+
+#### update
+
+A prop's target position has been calculated, and it is about to be moved toward it. The callback is passed the current position and projected velocity, which may be modified before the prop is moved.
+
+##### Callback parameters
+
+- `position` - a vector representing the position of this prop
+- `velocity` - a vector representing the velocity of this prop towards its target
+
+#### updated
+
+The prop has been moved and is done being updated for this cycle.
+
+##### Callback parameters
+
+- `position` - a vector representing the updated position of this prop
+
+#### enterattractor
+
+Fires when a follow prop has entered the `outerRadius` of an attractor and this prop has begun being affected by it.
+
+##### Callback parameters
+
+- `prop` - the prop that approached the attractor
+- `subject` - the prop doing the attracting
+- `attraction` - a number from 0 to 1 representing the fraction of the distance between `outerRadius` and `innerRadius`, or the amount that the attractor affecting the position of the target prop.
+
+#### enterattractor
+
+Fires when a follow prop moves within the `outerRadius` of an attractor and the attraction amount changes.
+
+##### Callback parameters
+
+- `prop` - the prop that approached the attractor
+- `subject` - the prop doing the attracting
+- `attraction` - a number from 0 to 1 representing the fraction of the distance between `outerRadius` and `innerRadius`, or the amount that the attractor affecting the position of the target prop.
+
+#### leaveattractor
+
+Fires when a follow prop moves outside the `outerRadius` of an attractor and the effect no longer applies.
+
+##### Callback parameters
+
+- `prop` - the prop that left the attractor
+- `subject` - the prop doing the attracting
 
 ## Roadmap
 - Support for matching orientation as well as position

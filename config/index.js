@@ -100,6 +100,26 @@ module.exports = (function () {
 				}
 			}),
 			new webpack.optimize.DedupePlugin(),
+			new webpack.BannerPlugin(banner)
+		],
+	});
+
+	exports.min = assign({}, common, {
+		devtool: 'source-map',
+		output: {
+			filename: 'dolly.min.js',
+			sourceMapFilename: '[file].map',
+			libraryTarget: 'umd',
+			library: 'Dolly'
+		},
+		plugins: [
+			new webpack.DefinePlugin({
+				'process.env': {
+					// This has effect on the react lib size
+					'NODE_ENV': JSON.stringify('production')
+				}
+			}),
+			new webpack.optimize.DedupePlugin(),
 			new webpack.optimize.UglifyJsPlugin({
 				compress: {
 					warnings: false

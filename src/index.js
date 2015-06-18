@@ -162,13 +162,13 @@ Prop.prototype.update = function (delta, tick) {
 
 	this.lastUpdate = tick;
 
+	this.lastPosition.copyVector(this.position);
+
 	this.emit('updatestart', this.position);
 
-	if (!this.targets.length) {
+	if (!this.targets.length && !this.attractors.length) {
 		return;
 	}
-
-	this.lastPosition.copyVector(this.position);
 
 	this.attractorGoal.zero();
 	this.attractors.forEach((attractor) => {
@@ -258,8 +258,8 @@ Prop.prototype.update = function (delta, tick) {
 	return this;
 };
 
-Prop.prototype.active = function () {
-	return this.position.distance(this.lastPosition) > 0.000001;
+Prop.prototype.active = function (epsilon) {
+	return this.position.distance(this.lastPosition) > (epsilon || 0.00001);
 };
 
 function Dolly() {
@@ -290,10 +290,10 @@ function Dolly() {
 		return prop;
 	};
 
-	this.active = function () {
+	this.active = function (epsilon) {
 		var i;
 		for (i = 0; i < props.length; i++) {
-			if (props[i].active()) {
+			if (props[i].active(epsilon)) {
 				return true;
 			}
 		}

@@ -33,7 +33,11 @@ module.exports = (function () {
 		// resolve: {
 		// 	modulesDirectories: ['web_modules', 'node_modules', 'bower_components']
 		// },
-		jshint: pkg.jshintConfig
+
+		jshint: assign({
+			failOnHint: true,
+			emitErrors: true
+		}, pkg.jshintConfig)
 	};
 
 	var exports = {};
@@ -66,7 +70,7 @@ module.exports = (function () {
 			}),
 			new webpack.optimize.DedupePlugin(),
 			new webpack.BannerPlugin(banner)
-		],
+		]
 	});
 
 	exports.min = assign({}, common, {

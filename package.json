@@ -61,9 +61,6 @@
       "shadow": true,
       "singleGroups": true,
       "undef": true,
-      "unused": true,
-
-      "failOnHint": true,
-      "emitErrors": true
+      "unused": true
   }
 }

@@ -31,5 +31,39 @@
     "object-assign": "^3.0.0",
     "event-emitter": "^0.3.3",
     "gl-matrix-vec3": "^2.2.1-npm"
+  },
+  "jshintConfig": {
+      "globals": {
+          "console": true
+      },
+
+      "esnext": true,
+      "bitwise": true,
+      "browser": true,
+      "camelcase": true,
+      "curly": true,
+      "eqeqeq": true,
+      "es3": true,
+      "forin": true,
+      "freeze": true,
+      "funcscope": true,
+      "globalstrict": true,
+      "immed": true,
+      "iterator": true,
+      "latedef": true,
+      "maxparams": 4,
+      "newcap": true,
+      "noarg": true,
+      "nonbsp": true,
+      "nonew": true,
+      "notypeof": true,
+      "quotmark": "single",
+      "shadow": true,
+      "singleGroups": true,
+      "undef": true,
+      "unused": true,
+
+      "failOnHint": true,
+      "emitErrors": true
   }
 }

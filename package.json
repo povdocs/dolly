@@ -2,7 +2,7 @@
   "name": "dolly",
   "version": "0.0.3",
   "description": "A JavaScript library for objects to follow other objects in 3D space",
-  "main": "dist/dolly.js",
+  "main": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

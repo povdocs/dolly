@@ -7,3 +7,5 @@ var gulp = require('gulp');
 tasks.forEach(function(task) {
 	require('./tasks/' + task);
 });
+
+gulp.task('default', ['lib', 'dist', 'min']);

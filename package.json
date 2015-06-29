@@ -4,8 +4,7 @@
   "description": "A JavaScript library for objects to follow other objects in 3D space",
   "main": "dist/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "prepublish": "gulp lib"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
@@ -22,7 +21,6 @@
     "babel-loader": "^5.1.2",
     "del": "^1.2.0",
     "gulp": "^3.8.11",
-    "gulp-babel": "^5.1.0",
     "gulp-webpack": "^1.4.0",
     "jshint": "^2.7.0",
     "jshint-loader": "^0.8.3",
@@ -35,33 +33,34 @@
     "gl-matrix-vec3": "^2.2.1-npm"
   },
   "jshintConfig": {
-    "globals": {
-      "console": true
-    },
-    "esnext": true,
-    "bitwise": true,
-    "browser": true,
-    "camelcase": true,
-    "curly": true,
-    "eqeqeq": true,
-    "es3": true,
-    "forin": true,
-    "freeze": true,
-    "funcscope": true,
-    "globalstrict": true,
-    "immed": true,
-    "iterator": true,
-    "latedef": true,
-    "maxparams": 4,
-    "newcap": true,
-    "noarg": true,
-    "nonbsp": true,
-    "nonew": true,
-    "notypeof": true,
-    "quotmark": "single",
-    "shadow": true,
-    "singleGroups": true,
-    "undef": true,
-    "unused": true
+      "globals": {
+          "console": true
+      },
+
+      "esnext": true,
+      "bitwise": true,
+      "browser": true,
+      "camelcase": true,
+      "curly": true,
+      "eqeqeq": true,
+      "es3": true,
+      "forin": true,
+      "freeze": true,
+      "funcscope": true,
+      "globalstrict": true,
+      "immed": true,
+      "iterator": true,
+      "latedef": true,
+      "maxparams": 4,
+      "newcap": true,
+      "noarg": true,
+      "nonbsp": true,
+      "nonew": true,
+      "notypeof": true,
+      "quotmark": "single",
+      "shadow": true,
+      "singleGroups": true,
+      "undef": true,
+      "unused": true
   }
 }

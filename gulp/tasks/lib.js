@@ -1,12 +1,10 @@
 'use strict';
 
 var gulp = require('gulp');
-var webpack = require('gulp-webpack');
+var babel = require('gulp-babel');
 
 gulp.task('lib', function () {
-	var config = require('../../config');
-
 	return gulp.src('src/index.js')
-		.pipe(webpack(config.lib))
+		.pipe(babel())
 		.pipe(gulp.dest('dist'));
 });

@@ -53,21 +53,6 @@ module.exports = (function () {
 		}
 	});
 
-	exports.lib = assign({}, common, {
-		devtool: 'source-map',
-		output: {
-			filename: 'index.js',
-			pathInfo: true,
-			libraryTarget: 'umd',
-			library: 'Dolly'
-		},
-		externals: [
-			'object-assign',
-			'gl-matrix-vec3',
-			'event-emitter'
-		]
-	});
-
 	exports.production = assign({}, common, {
 		devtool: 'source-map',
 		output: {
